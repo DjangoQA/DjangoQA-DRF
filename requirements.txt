@@ -1,2 +1,4 @@
 pip==22.0.3
 django==4.0.2
+python-dotenv==0.19.2
+psycopg2-binary==2.9.3

@@ -10,22 +10,25 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
+from os import environ
 from pathlib import Path
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+load_dotenv(dotenv_path=BASE_DIR / '.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-xb#(j$k1b%&ub!=g!rr#$cb&9cbpi)$5(cw043so!h@t)3#i1d'
+SECRET_KEY = environ.get("SECRET_KEY", default="insecure-secret-key-just-for-build-and-test").strip('"')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = bool(int(environ["DEBUG"].strip('"')))
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = environ["DJANGO_ALLOWED_HOSTS"].strip('"').split()
 
 
 # Application definition
@@ -74,10 +77,18 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": environ["POSTGRES_DB_NAME"].strip('"'),
+        "USER": environ["POSTGRES_USER"].strip('"'),
+        "PASSWORD": environ["POSTGRES_PASSWORD"].strip('"'),
+        "PORT": environ["POSTGRES_PORT"].strip('"'),
+        "HOST": environ["POSTGRES_HOST"].strip('"'),
+    },
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / 'db.sqlite3',
+    # }
 }
 
 
