@@ -4,9 +4,9 @@ import redis
 
 from datetime import datetime
 
-
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.hashers import make_password, check_password
 
 from config import settings
 
@@ -31,28 +31,27 @@ class RedisConnection:
             cls._instance = super().__new__(*args, **kwargs)
         return cls._instance
 
-    def redis_connect(self):
+    def __redis_connect(self):
         return redis.Redis(host=self.host, port=self.port, db=self.db)
 
     @staticmethod
-    def redis_disconnect(redis_instance):
+    def __redis_disconnect(redis_instance):
         redis_instance.close()
 
     def set_otp(self, key):
-        redis_instance = self.redis_connect()
+        redis_instance = self.__redis_connect()
         otp_code = random.randint(1111, 9999)
-        redis_instance.set(key, otp_code)
+        redis_instance.set(key, make_password(str(otp_code)))
         redis_instance.expire(key, 180)
-        self.redis_disconnect(redis_instance)
+        self.__redis_disconnect(redis_instance)
         return otp_code
 
     def verify_otp(self, key, otp_verify):
-        redis_instance = self.redis_connect()
+        redis_instance = self.__redis_connect()
         otp_code = redis_instance.get(key)
-        self.redis_disconnect(redis_instance)
-
+        self.__redis_disconnect(redis_instance)
         if otp_code:
-            if int(otp_code) == otp_verify:
-                return otp_code
-            raise ValidationError(_('OTP code incorrect!'))
-        raise ValidationError(_('OTP code expired!'))
+            if check_password(otp_verify, otp_code.decode('utf8')):
+                return True, True
+            return True, False
+        return False, False
