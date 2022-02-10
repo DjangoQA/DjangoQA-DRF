@@ -134,3 +134,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'accounts.User'
+
+# Redis
+REDIS_HOST = environ["REDIS_HOST"].strip('"')
+REDIS_PORT = environ["REDIS_PORT"].strip('"')
+REDIS_DB = environ["REDIS_DB"].strip('"')
