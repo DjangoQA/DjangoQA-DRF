@@ -14,7 +14,7 @@ class RedisConnectionTest(TestCase):
         self.assertTrue(is_valid)
 
     def test_redis_is_exists_invalid_otp_code(self):
-        self.redis_instance.set_otp('test_key')
+        self.redis_instance.set_otp('test key')
         is_exists, is_valid = self.redis_instance.verify_otp('test key', 'bad value')
         self.assertTrue(is_exists)
         self.assertFalse(is_valid)
