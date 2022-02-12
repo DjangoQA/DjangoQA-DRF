@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
+    'drf_yasg',
 
     'accounts.apps.AccountsConfig',
 ]
@@ -149,3 +150,14 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = environ["EMAIL_HOST_USER"].strip('"')
 EMAIL_HOST_PASSWORD = environ["EMAIL_HOST_PASSWORD"].strip('"')
+
+# Swagger
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+    },
+}
