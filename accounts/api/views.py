@@ -7,6 +7,9 @@ from accounts.tasks import email_verification
 
 
 class OTPAPIView(GenericAPIView):
+    """
+    Create a one time password and send for user email or phone number.
+    """
     serializer_class = OTPEmailSerializer
 
     # TODO-1: add lookup_url_kwarg for email and phone number opt send

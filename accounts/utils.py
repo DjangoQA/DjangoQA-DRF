@@ -18,6 +18,9 @@ def user_directory_path(instance, filename):
 
 
 class RedisConnection:
+    """
+    Redis connection is singleton model which generate a code and save that with key in database as otp code
+    """
     _instance = None
 
     def __init__(self):
