@@ -78,6 +78,6 @@ class WebhookGenericApiView(GenericAPIView):
         except KeyError:
             self.status = status.HTTP_400_BAD_REQUEST
             self.payload = "Json structure is not right."
-        else:
+        finally:
             # finalize response
             return Response(self.payload, status=self.status)
