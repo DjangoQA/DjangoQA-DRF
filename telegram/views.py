@@ -65,7 +65,10 @@ class WebhookGenericApiView(GenericAPIView):
             }
 
     def post(self, request, *args, **kwargs):
+        if kwargs["token"] != settings.TELEGRAM_BOT_ENDPOINT:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         try:
+
             # parsing message from telegram
             message = self.message = request.data["message"]
             if "text" in message:
