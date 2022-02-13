@@ -153,3 +153,4 @@ EMAIL_HOST_PASSWORD = environ["EMAIL_HOST_PASSWORD"].strip('"')
 
 # Telegram
 TELEGRAM_BOT_TOKEN = environ["TELEGRAM_BOT_TOKEN"].strip('"')
+TELEGRAM_BOT_ENDPOINT = environ["TELEGRAM_BOT_ENDPOINT"].strip('"')
