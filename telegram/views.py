@@ -42,6 +42,7 @@ class WebhookGenericApiView(GenericAPIView):
                 "method": "sendMessage",
                 "chat_id": tg_id,
                 "text": _("Please enter your desired Username:"),
+                "reply_markup": {"remove_keyboard": True},
             }
         else:
             # TODO: send token
@@ -49,12 +50,13 @@ class WebhookGenericApiView(GenericAPIView):
                 "method": "sendMessage",
                 "chat_id": tg_id,
                 "text": f"enjoy token dear {user.username}! http://blahblah..",
+                "reply_markup": {"remove_keyboard": True},
             }
 
     def save_contact(self):
         tg_id = self.tg_id
         contact_user_id = self.message["contact"]["user_id"]
-        phone_number = self.message["contact"]["phone_number"]
+        phone_number = self.message["contact"]["phone_number"].lstrip("+")
         user = User.objects.get(telegram_id=tg_id)
         if user.phone_number:
             return
@@ -80,6 +82,7 @@ class WebhookGenericApiView(GenericAPIView):
                     "method": "sendMessage",
                     "chat_id": tg_id,
                     "text": _("Please enter your desired Username:"),
+                    "reply_markup": {"remove_keyboard": True},
                 }
             else:
                 # TODO: send token
@@ -87,6 +90,7 @@ class WebhookGenericApiView(GenericAPIView):
                     "method": "sendMessage",
                     "chat_id": tg_id,
                     "text": f"enjoy token dear {user.username}! http://blahblah..",
+                    "reply_markup": {"remove_keyboard": True},
                 }
 
     def save_username(self):
@@ -102,6 +106,7 @@ class WebhookGenericApiView(GenericAPIView):
                 "method": "sendMessage",
                 "chat_id": tg_id,
                 "text": f"{error.message}",
+                "reply_markup": {"remove_keyboard": True},
             }
         else:
             if User.objects.filter(username=username).exists():
@@ -109,6 +114,7 @@ class WebhookGenericApiView(GenericAPIView):
                     "method": "sendMessage",
                     "chat_id": tg_id,
                     "text": _("Username already taken, try something else."),
+                    "reply_markup": {"remove_keyboard": True},
                 }
                 return
             user = User.objects.get(telegram_id=tg_id)
@@ -120,6 +126,7 @@ class WebhookGenericApiView(GenericAPIView):
                 "method": "sendMessage",
                 "chat_id": tg_id,
                 "text": f"enjoy token dear {user.username}! http://blahblah..",
+                "reply_markup": {"remove_keyboard": True},
             }
 
     def post(self, request, *args, **kwargs):
