@@ -34,6 +34,9 @@ class User(AbstractUser):
     avatar = models.ImageField(upload_to=user_directory_path, verbose_name=_('avatar'))
     telegram_id = models.BigIntegerField(verbose_name=_('telegram id'), null=True, blank=True)
 
+    def __str__(self):
+        return f"{self.pk}"
+
     class Meta:
         verbose_name = _('user')
         verbose_name_plural = _('users')
