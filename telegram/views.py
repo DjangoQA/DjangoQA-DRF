@@ -1,11 +1,15 @@
-from venv import create
-from xml.sax.handler import property_interning_dict
 from django.conf import settings
+from django.forms import ValidationError
+from django.contrib.auth import get_user_model
+from django.utils.translation import gettext_lazy as _
+from django.core.cache import cache
+from django.contrib.auth.validators import ASCIIUsernameValidator
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
-from django.contrib.auth import get_user_model
-from django.utils.translation import gettext_lazy as _
+
+from accounts.validators import TelegramUsernameValidator
+
 
 User = get_user_model()
 
@@ -17,15 +21,13 @@ class WebhookGenericApiView(GenericAPIView):
         self.status = status.HTTP_200_OK
 
     def start(self):
-        tg_id = self.message["chat"]["id"]
-        user, created = User.objects.get_or_create(
-            username=f"U{tg_id}", telegram_id=tg_id
-        )
+        tg_id = self.tg_id
+        user, created = User.objects.get_or_create(telegram_id=tg_id)
         if created or not user.phone_number:
             self.payload = {
                 "method": "sendMessage",
                 "chat_id": tg_id,
-                "text": _("Please share your phone number to Signup"),
+                "text": _("Please share your phone number to Signup:"),
                 "reply_markup": {
                     "keyboard": [
                         [{"text": _("Share Contact"), "request_contact": True}]
@@ -34,18 +36,29 @@ class WebhookGenericApiView(GenericAPIView):
                     "one_time_keyboard": True,
                 },
             }
-        else:
+        elif not user.username:
+            cache.set(tg_id, "username", 180)
             self.payload = {
                 "method": "sendMessage",
                 "chat_id": tg_id,
-                "text": "enjoy token!",
+                "text": _("Please enter your desired Username:"),
+            }
+        else:
+            # TODO: send token
+            self.payload = {
+                "method": "sendMessage",
+                "chat_id": tg_id,
+                "text": f"enjoy token dear {user.username}! http://blahblah..",
             }
 
-    def contact(self):
-        tg_id = self.message["chat"]["id"]
+    def save_contact(self):
+        tg_id = self.tg_id
         contact_user_id = self.message["contact"]["user_id"]
         phone_number = self.message["contact"]["phone_number"]
-        if tg_id != contact_user_id:
+        user = User.objects.get(telegram_id=tg_id)
+        if user.phone_number:
+            return
+        elif tg_id != contact_user_id:
             self.payload = {
                 "method": "sendMessage",
                 "chat_id": tg_id,
@@ -59,14 +72,54 @@ class WebhookGenericApiView(GenericAPIView):
                 },
             }
         else:
-            user, created = User.objects.update_or_create(
-                telegram_id=tg_id,
-                defaults={"username": f"U{tg_id}", "phone_number": phone_number},
-            )
+            user.phone_number = phone_number
+            user.save()
+            if not user.username:
+                cache.set(tg_id, "username", 180)
+                self.payload = {
+                    "method": "sendMessage",
+                    "chat_id": tg_id,
+                    "text": _("Please enter your desired Username:"),
+                }
+            else:
+                # TODO: send token
+                self.payload = {
+                    "method": "sendMessage",
+                    "chat_id": tg_id,
+                    "text": f"enjoy token dear {user.username}! http://blahblah..",
+                }
+
+    def save_username(self):
+        tg_id = self.tg_id
+        username = self.message["text"]
+        try:
+            ascii_username_validator = ASCIIUsernameValidator()
+            tg_username_validator = TelegramUsernameValidator()
+            ascii_username_validator(username)
+            tg_username_validator(username)
+        except ValidationError as error:
             self.payload = {
                 "method": "sendMessage",
                 "chat_id": tg_id,
-                "text": "enjoy token!",
+                "text": f"{error.message}",
+            }
+        else:
+            if User.objects.filter(username=username).exists():
+                self.payload = {
+                    "method": "sendMessage",
+                    "chat_id": tg_id,
+                    "text": _("Username already taken, try something else."),
+                }
+                return
+            user = User.objects.get(telegram_id=tg_id)
+            user.username = username
+            user.save()
+            cache.delete(tg_id)
+            # TODO: send token
+            self.payload = {
+                "method": "sendMessage",
+                "chat_id": tg_id,
+                "text": f"enjoy token dear {user.username}! http://blahblah..",
             }
 
     def post(self, request, *args, **kwargs):
@@ -75,16 +128,25 @@ class WebhookGenericApiView(GenericAPIView):
         try:
             # parsing message from telegram
             message = self.message = request.data["message"]
-            if "text" in message:
-                if message["text"] == "/start":
-                    # user issued start command
-                    self.start()
-            elif "contact" in message:
-                # user shared contact
-                self.contact()
+            tg_id = self.tg_id = self.message["chat"]["id"]
+            if message["chat"]["type"] == "private":
+                if "text" in message:
+                    # user sent messsge with text
+                    if message["text"] == "/start":
+                        # user issued start command
+                        self.start()
+                    elif state := cache.get(tg_id):
+                        if state == "username":
+                            # user send username
+                            self.save_username()
+                elif "contact" in message:
+                    # user shared contact
+                    self.save_contact()
         except KeyError:
             self.status = status.HTTP_400_BAD_REQUEST
             self.payload = "Json structure is not right."
+        except Exception as e:
+            print(e)
         finally:
             # finalize response
             return Response(self.payload, status=self.status)

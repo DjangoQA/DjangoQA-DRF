@@ -143,6 +143,14 @@ REDIS_HOST = environ["REDIS_HOST"].strip('"')
 REDIS_PORT = environ["REDIS_PORT"].strip('"')
 REDIS_DB = environ["REDIS_DB"].strip('"')
 
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': f'redis://{REDIS_HOST}:{REDIS_PORT}',
+    }
+}
+
 # EMAIL
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
