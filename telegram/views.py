@@ -1,3 +1,5 @@
+from venv import create
+from xml.sax.handler import property_interning_dict
 from django.conf import settings
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
@@ -16,7 +18,9 @@ class WebhookGenericApiView(GenericAPIView):
 
     def start(self):
         tg_id = self.message["chat"]["id"]
-        user, created = User.objects.get_or_create(telegram_id=tg_id)
+        user, created = User.objects.get_or_create(
+            username=f"U{tg_id}", telegram_id=tg_id
+        )
         if created or not user.phone_number:
             self.payload = {
                 "method": "sendMessage",
@@ -56,7 +60,8 @@ class WebhookGenericApiView(GenericAPIView):
             }
         else:
             user, created = User.objects.update_or_create(
-                telegram_id=tg_id, defaults={"phone_number": phone_number}
+                telegram_id=tg_id,
+                defaults={"username": f"U{tg_id}", "phone_number": phone_number},
             )
             self.payload = {
                 "method": "sendMessage",
@@ -68,7 +73,6 @@ class WebhookGenericApiView(GenericAPIView):
         if kwargs["token"] != settings.TELEGRAM_BOT_ENDPOINT:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         try:
-
             # parsing message from telegram
             message = self.message = request.data["message"]
             if "text" in message:

@@ -25,8 +25,10 @@ class User(AbstractUser):
         error_messages={
             'unique': _("A user with that username already exists."),
         },
+        null=True,
+        blank=True
     )
-    email = models.EmailField(_('email address'), unique=True)
+    email = models.EmailField(_('email address'), unique=True, null=True, blank=True)
     phone_number = models.CharField(max_length=12, validators=[phone_number_validator])
 
     avatar = models.ImageField(upload_to=user_directory_path, verbose_name=_('avatar'))
