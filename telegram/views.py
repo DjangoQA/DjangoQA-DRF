@@ -1,12 +1,13 @@
 from django.conf import settings
+from django.core.cache import cache
+from django.db import IntegrityError
 from django.forms import ValidationError
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
-from django.core.cache import cache
-from django.contrib.auth.validators import ASCIIUsernameValidator
-from rest_framework.generics import GenericAPIView
-from rest_framework.response import Response
+
 from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.generics import GenericAPIView
 
 from accounts.validators import TelegramUsernameValidator
 
@@ -45,6 +46,7 @@ class WebhookGenericApiView(GenericAPIView):
                 "reply_markup": {"remove_keyboard": True},
             }
         else:
+            cache.delete(tg_id)
             # TODO: send token
             self.payload = {
                 "method": "sendMessage",
@@ -85,6 +87,7 @@ class WebhookGenericApiView(GenericAPIView):
                     "reply_markup": {"remove_keyboard": True},
                 }
             else:
+                cache.delete(tg_id)
                 # TODO: send token
                 self.payload = {
                     "method": "sendMessage",
@@ -96,36 +99,36 @@ class WebhookGenericApiView(GenericAPIView):
     def save_username(self):
         tg_id = self.tg_id
         username = self.message["text"]
+        validator = TelegramUsernameValidator()
+        text = _("Please enter your desired Username:")
+        # setting username-state again for the next messages in case of error:
+        cache.set(tg_id, "username", 180)
         try:
-            ascii_username_validator = ASCIIUsernameValidator()
-            tg_username_validator = TelegramUsernameValidator()
-            ascii_username_validator(username)
-            tg_username_validator(username)
+            # validating username:
+            validator(username)
+            # trying to save username:
+            User.objects.filter(telegram_id=tg_id).update(username=username)
         except ValidationError as error:
+            # validation error occurred.
             self.payload = {
                 "method": "sendMessage",
                 "chat_id": tg_id,
-                "text": f"{error.message}",
-                "reply_markup": {"remove_keyboard": True},
+                "text": f"{error.message}\n\n{text}",
+            }
+        except IntegrityError:
+            # duplicate username error occurred.
+            self.payload = {
+                "method": "sendMessage",
+                "chat_id": tg_id,
+                "text": f"Username was already taken.\n\n{text}",
             }
         else:
-            if User.objects.filter(username=username).exists():
-                self.payload = {
-                    "method": "sendMessage",
-                    "chat_id": tg_id,
-                    "text": _("Username already taken, try something else."),
-                    "reply_markup": {"remove_keyboard": True},
-                }
-                return
-            user = User.objects.get(telegram_id=tg_id)
-            user.username = username
-            user.save()
             cache.delete(tg_id)
             # TODO: send token
             self.payload = {
                 "method": "sendMessage",
                 "chat_id": tg_id,
-                "text": f"enjoy token dear {user.username}! http://blahblah..",
+                "text": f"enjoy token dear {username}! http://blahblah..",
                 "reply_markup": {"remove_keyboard": True},
             }
 
@@ -152,8 +155,6 @@ class WebhookGenericApiView(GenericAPIView):
         except KeyError:
             self.status = status.HTTP_400_BAD_REQUEST
             self.payload = "Json structure is not right."
-        except Exception as e:
-            print(e)
         finally:
             # finalize response
-            return Response(self.payload, status=self.status)
+            return Response(self.payload, self.status)
