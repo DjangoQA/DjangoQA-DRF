@@ -13,6 +13,9 @@ def start(message: dict):
     # ACTION:
     user, created = User.objects.get_or_create(telegram_id=tg_id)
     if created or not user.phone_number:
+        # if user is created right now or phone_number is empty,
+        # we need to ask for phone number.
+        cache.set(tg_id, "contact_required")
         return {
             "method": "sendMessage",
             "chat_id": tg_id,
@@ -24,7 +27,9 @@ def start(message: dict):
             },
         }
     elif not user.username:
-        cache.set(tg_id, "username", 180)
+        # if user has phone number but not username,
+        # we need to ask for username.
+        cache.set(tg_id, "username_required")
         return {
             "method": "sendMessage",
             "chat_id": tg_id,
@@ -32,8 +37,8 @@ def start(message: dict):
             "reply_markup": {"remove_keyboard": True},
         }
     else:
-        cache.delete(tg_id)
-        # TODO: send token
+        cache.set(tg_id, "menu")
+        # TODO: show menu
         return {
             "method": "sendMessage",
             "chat_id": tg_id,
