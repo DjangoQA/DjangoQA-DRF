@@ -28,9 +28,7 @@ def contact_required(message: dict):
 
     # ACTION:
     user = User.objects.get(telegram_id=tg_id)
-    if user.phone_number:
-        return
-    elif tg_id != contact_user_id:
+    if tg_id != contact_user_id:
         return {
             "method": "sendMessage",
             "chat_id": tg_id,
@@ -44,19 +42,10 @@ def contact_required(message: dict):
     else:
         user.phone_number = contact_phone_number.lstrip("+")
         user.save()
-        if not user.username:
-            return {
-                "method": "sendMessage",
-                "chat_id": tg_id,
-                "text": _("Please enter your desired Username:"),
-                "reply_markup": {"remove_keyboard": True},
-            }
-        else:
-            cache.set(tg_id, "menu")
-            # TODO: show menu
-            return {
-                "method": "sendMessage",
-                "chat_id": tg_id,
-                "text": f"enjoy token dear {user.username}! http://blahblah..",
-                "reply_markup": {"remove_keyboard": True},
-            }
+        cache.set(tg_id, "username_required")
+        return {
+            "method": "sendMessage",
+            "chat_id": tg_id,
+            "text": _("Please enter your desired Username:"),
+            "reply_markup": {"remove_keyboard": True},
+        }
