@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 
 from .extensions.permissions import TokenPermission
-from .actions import start, save_contact, save_username
+from .actions import start, contact_required, username_required
 
 
 class WebhookGenericApiView(GenericAPIView):
@@ -20,37 +20,38 @@ class WebhookGenericApiView(GenericAPIView):
     def post(self, request, *args, **kwargs):
         """
         Processes the incoming message and only calls the required Action.
-        any message that passed the KeyErrors results as HTTP_200_OK.
+        any message that passed the KeyErrors return HTTP_200_OK.
         """
         try:
             # required key OR KeyError:
             message = request.data["message"]
 
-            # chat type must be private
+            # chat type must be private.
             if message["chat"]["type"] == "private":
-                # safe keys:
+                # now its safe to get chat_id key.
                 tg_id = message["chat"]["id"]
+
+                # get the state from cache using tg_id.
                 state = cache.get(tg_id)
 
-                if "text" in message:
-                    # user sent messsge with text
+                # detecting Start command ->
+                if not state or ("text" in message and message["text"] == "/start"):
+                    # if state is None, we need to call start action.
+                    self.payload = start(message)
 
-                    if message["text"] == "/start":
-                        # user issued start command
+                elif state == "contact_required":
+                    self.payload = contact_required(message)
 
-                        self.payload = start(message)
-                    elif state == "username":
-                        # user send username
+                elif state == "username_required":
+                    self.payload = username_required(message)
 
-                        self.payload = save_username(message)
-                elif "contact" in message:
-                    # user shared contact
+                elif state == "menu":
+                    # TODO: show menu
+                    pass
 
-                    self.payload = save_contact(message)
         except KeyError:
             self.status = status.HTTP_400_BAD_REQUEST
             self.payload = "Json structure is not right."
         finally:
             # finale response independent of errors
-
             return Response(self.payload, self.status)
