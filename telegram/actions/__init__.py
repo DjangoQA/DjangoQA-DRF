@@ -1,3 +1,3 @@
 from .start import start
-from .save_username import save_username
-from .save_contact import save_contact
+from .username_required import username_required
+from .contact_required import contact_required

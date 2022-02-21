@@ -10,7 +10,7 @@ from accounts.validators import TelegramUsernameValidator
 User = get_user_model()
 
 
-def save_username(message: dict):
+def username_required(message: dict):
     # INITIALIZING VARIABLES:
     tg_id = message["chat"]["id"]
     username = message["text"]
@@ -19,7 +19,7 @@ def save_username(message: dict):
     validator = TelegramUsernameValidator()
     text = _("Please enter your desired Username:")
     # setting username-state again for the next messages in case of error:
-    cache.set(tg_id, "username", 180)
+    cache.set(tg_id, "username_required")
     try:
         # validating username:
         validator(username)
@@ -40,8 +40,8 @@ def save_username(message: dict):
             "text": f"Username was already taken.\n\n{text}",
         }
     else:
-        cache.delete(tg_id)
-        # TODO: send token
+        cache.set(tg_id, "menu")
+        # TODO: show menu
         return {
             "method": "sendMessage",
             "chat_id": tg_id,
