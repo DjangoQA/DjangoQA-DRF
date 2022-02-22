@@ -26,5 +26,9 @@ def contact_required(message: dict):
     else:
         user.phone_number = contact_phone_number.lstrip("+")
         user.save()
-        cache.set(tg_id, "username_required")
-        return request_username(tg_id)
+        if user.username:
+            cache.set(tg_id, "menu")
+            # TODO: show menu
+        else:
+            cache.set(tg_id, "username_required")
+            return request_username(tg_id)
