@@ -5,7 +5,11 @@ from django.forms import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from accounts.validators import TelegramUsernameValidator
-from telegram.payloads import username_validation_error, username_duplicate_error
+from telegram.payloads import (
+    username_validation_error,
+    username_duplicate_error,
+    request_username,
+)
 
 User = get_user_model()
 
@@ -13,7 +17,13 @@ User = get_user_model()
 def username_required(message: dict):
     # INITIALIZING VARIABLES:
     tg_id = message["chat"]["id"]
-    username = message["text"]
+    
+    # cheking if user sent text:
+    if "text" in message:
+        username = message["text"]
+    else:
+        return request_username(tg_id)
+
     validator = TelegramUsernameValidator()
     # setting text to ask again in case of error
     text = _("Please enter your desired Username:")

@@ -1,4 +1,4 @@
-def validation_error(tg_id, message, text):
+def username_validation_error(tg_id, message, text):
     return {
         "method": "sendMessage",
         "chat_id": tg_id,
