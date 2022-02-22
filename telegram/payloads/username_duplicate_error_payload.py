@@ -1,4 +1,4 @@
-def username_duplicate_error(tg_id, text):
+def username_duplicate_error_payload(tg_id, text):
     return {
         "method": "sendMessage",
         "chat_id": tg_id,
