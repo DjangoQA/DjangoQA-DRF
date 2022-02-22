@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 
-from .extensions.permissions import TokenPermission
+from .permissions import TokenPermission
 from .actions import start, contact_required, username_required
 
 
