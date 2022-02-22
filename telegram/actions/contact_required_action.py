@@ -8,7 +8,7 @@ from telegram.payloads import request_phone_number, invalid_phone_number, reques
 User = get_user_model()
 
 
-def contact_required(message: dict):
+def contact_required_action(message: dict):
     # INITIALIZING VARIABLES:
     tg_id = message["chat"]["id"]
 

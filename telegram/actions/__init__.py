@@ -1,4 +1,4 @@
 from .start_action import start_action
-from .username_required import username_required
-from .contact_required import contact_required
-from .phone_login import phone_login
+from .username_required_action import username_required_action
+from .contact_required_action import contact_required_action
+from .phone_login_action import phone_login

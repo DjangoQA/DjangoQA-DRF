@@ -14,7 +14,7 @@ from telegram.payloads import (
 User = get_user_model()
 
 
-def username_required(message: dict):
+def username_required_action(message: dict):
     # INITIALIZING VARIABLES:
     tg_id = message["chat"]["id"]
     
