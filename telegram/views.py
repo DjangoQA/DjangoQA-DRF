@@ -5,8 +5,10 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 
+from telegram.payloads.callbacks import login, welcome
+
 from .permissions import TokenPermission
-from .actions import start, contact_required, username_required
+from .actions import start, contact_required, username_required, phone_login
 
 
 class WebhookGenericApiView(GenericAPIView):
@@ -18,6 +20,7 @@ class WebhookGenericApiView(GenericAPIView):
         """
         self.payload = {}
 
+        # process the incoming message
         if (
             "message" in request.data
             and request.data["message"]["chat"]["type"] == "private"
@@ -44,5 +47,17 @@ class WebhookGenericApiView(GenericAPIView):
             elif state == "menu":
                 # TODO: show menu
                 pass
+
+        elif "callback_query" in request.data:
+            # now its safe to get below keys.
+            callback = request.data["callback_query"]
+            tg_id = callback["message"]["chat"]["id"]
+            message_id = callback["message"]["message_id"]
+            data = callback["data"]
+
+            if data == "welcome":
+                self.payload = welcome(tg_id, message_id)
+            if data == "login":
+                self.payload = login(tg_id, message_id)
 
         return Response(self.payload, status.HTTP_200_OK)

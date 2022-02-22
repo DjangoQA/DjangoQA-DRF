@@ -9,8 +9,6 @@ def welcome(tg_id, username):
             f"Hi {username} 👋 \nWelcome to DjangoQa official bot. If you need any assistance, I’m always here."
         ),
         "reply_markup": {
-            "inline_keyboard": [
-                [{"text": _("Login"), "callback_data": "login"}]
-            ],
+            "inline_keyboard": [[{"text": _("Login"), "callback_data": "login"}]],
         },
     }
