@@ -3,3 +3,4 @@ from .invalid_phone_number import invalid_phone_number
 from .request_username import request_username
 from .username_duplicate_error import username_duplicate_error
 from .username_validation_error import username_validation_error
+from .welcome import welcome
