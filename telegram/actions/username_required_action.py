@@ -6,9 +6,9 @@ from django.utils.translation import gettext_lazy as _
 
 from accounts.validators import TelegramUsernameValidator
 from telegram.payloads import (
-    username_validation_error,
-    username_duplicate_error,
-    request_username,
+    username_validation_error_payload,
+    username_duplicate_error_payload,
+    request_username_payload,
 )
 
 User = get_user_model()

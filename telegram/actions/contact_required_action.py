@@ -2,7 +2,11 @@ from django.core.cache import cache
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 
-from telegram.payloads import request_phone_number, invalid_phone_number, request_username
+from telegram.payloads import (
+    request_phone_number_payload,
+    invalid_phone_number_payload,
+    request_username_payload,
+)
 
 
 User = get_user_model()

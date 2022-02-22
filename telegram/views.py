@@ -7,9 +7,13 @@ from rest_framework.generics import GenericAPIView
 
 
 from .permissions import TokenPermission
-from .actions import start_action, contact_required, username_required, phone_login
+from .actions import (
+    start_action,
+    contact_required_action,
+    username_required_action,
+    phone_login_action,
+)
 from .actions.callbacks import welcome_callback_action, login_callback_action
-
 
 
 class WebhookGenericApiView(GenericAPIView):
