@@ -5,7 +5,7 @@ from django.forms import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from accounts.validators import TelegramUsernameValidator
-
+from telegram.payloads import username_validation_error, username_duplicate_error
 
 User = get_user_model()
 
@@ -14,12 +14,15 @@ def username_required(message: dict):
     # INITIALIZING VARIABLES:
     tg_id = message["chat"]["id"]
     username = message["text"]
+    validator = TelegramUsernameValidator()
+    # setting text to ask again in case of error
+    text = _("Please enter your desired Username:")
 
     # ACTION:
-    validator = TelegramUsernameValidator()
-    text = _("Please enter your desired Username:")
+
     # setting username-state again for the next messages in case of error:
     cache.set(tg_id, "username_required")
+
     try:
         # validating username:
         validator(username)
@@ -27,24 +30,10 @@ def username_required(message: dict):
         User.objects.filter(telegram_id=tg_id).update(username=username)
     except ValidationError as error:
         # validation error occurred.
-        return {
-            "method": "sendMessage",
-            "chat_id": tg_id,
-            "text": f"{error.message}\n\n{text}",
-        }
+        return username_validation_error(tg_id, error.message, text)
     except IntegrityError:
         # duplicate username error occurred.
-        return {
-            "method": "sendMessage",
-            "chat_id": tg_id,
-            "text": f"Username was already taken.\n\n{text}",
-        }
+        return username_duplicate_error(tg_id, text)
     else:
         cache.set(tg_id, "menu")
         # TODO: show menu
-        return {
-            "method": "sendMessage",
-            "chat_id": tg_id,
-            "text": f"enjoy token dear {username}! http://blahblah..",
-            "reply_markup": {"remove_keyboard": True},
-        }
