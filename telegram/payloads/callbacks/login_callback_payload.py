@@ -1,12 +1,12 @@
-import string
 from django.utils.translation import gettext_lazy as _
 
 
-def login(chat_id: string, message_id: string):
+def login_callback_payload(chat_id: str, message_id: str):
     return {
-        "method": "editMessageReplyMarkup",
+        "method": "editMessageText",
         "chat_id": chat_id,
         "message_id": message_id,
+        "text": "We currently support below login methods. Which one do you prefer?",
         "reply_markup": {
             "inline_keyboard": [
                 [{"text": _("Phone number"), "callback_data": "phone_login"}],
@@ -17,7 +17,7 @@ def login(chat_id: string, message_id: string):
                         "callback_data": "google_login",
                     }
                 ],
-                [{"text": _("Return"), "callback_data": "welcome"}],
+                [{"text": _("Back"), "callback_data": "welcome"}],
             ],
         },
     }

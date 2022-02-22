@@ -5,10 +5,11 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 
-from telegram.payloads.callbacks import login, welcome
 
 from .permissions import TokenPermission
-from .actions import start, contact_required, username_required, phone_login
+from .actions import start_action, contact_required, username_required, phone_login
+from .actions.callbacks import welcome_callback_action, login_callback_action
+
 
 
 class WebhookGenericApiView(GenericAPIView):
@@ -36,7 +37,7 @@ class WebhookGenericApiView(GenericAPIView):
             # detecting Start command ->
             if not state or ("text" in message and message["text"] == "/start"):
                 # if state is None, we need to call start action.
-                self.payload = start(message)
+                self.payload = start_action(message)
 
             elif state == "contact_required":
                 self.payload = contact_required(message)
@@ -44,20 +45,15 @@ class WebhookGenericApiView(GenericAPIView):
             elif state == "username_required":
                 self.payload = username_required(message)
 
-            elif state == "menu":
-                # TODO: show menu
-                pass
-
         elif "callback_query" in request.data:
             # now its safe to get below keys.
             callback = request.data["callback_query"]
-            tg_id = callback["message"]["chat"]["id"]
-            message_id = callback["message"]["message_id"]
             data = callback["data"]
 
+            # routing the callback data to the required action.
             if data == "welcome":
-                self.payload = welcome(tg_id, message_id)
+                self.payload = welcome_callback_action(callback)
             if data == "login":
-                self.payload = login(tg_id, message_id)
+                self.payload = login_callback_action(callback)
 
         return Response(self.payload, status.HTTP_200_OK)

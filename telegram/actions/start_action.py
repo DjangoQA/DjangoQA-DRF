@@ -2,15 +2,16 @@ from django.core.cache import cache
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 
-from telegram.payloads import welcome
+from telegram.payloads import welcome_user_payload, welcome_guest_payload
 
 User = get_user_model()
 
 
-def start(message: dict):
+def start_action(message: dict):
     # INITIALIZING VARIABLES:
     tg_id = message["chat"]["id"]
     name = message["chat"]["first_name"]
+
     # ACTION:
     user, created = User.objects.get_or_create(telegram_id=tg_id)
 
@@ -20,10 +21,8 @@ def start(message: dict):
     if (user.phone_number or user.email) and user.username:
         # authenticated user.
         cache.set(tg_id, "user")
-        name = user.username
+        return welcome_user_payload(tg_id, user.username)
     else:
         # otherwise it will be our guest.
         cache.set(tg_id, "guest")
-
-    # finally we show welcome no matter they are guest or buddie.
-    return welcome(tg_id, name)
+        return welcome_guest_payload(tg_id, name)

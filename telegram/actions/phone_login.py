@@ -5,7 +5,6 @@ from django.core.cache import cache
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 
-from telegram.payloads import welcome
 
 User = get_user_model()
 
