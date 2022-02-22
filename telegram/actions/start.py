@@ -2,7 +2,7 @@ from django.core.cache import cache
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 
-from telegram.payloads import request_phone_number, request_username
+from telegram.payloads import welcome
 
 User = get_user_model()
 
@@ -10,19 +10,20 @@ User = get_user_model()
 def start(message: dict):
     # INITIALIZING VARIABLES:
     tg_id = message["chat"]["id"]
-
+    name = message["chat"]["first_name"]
     # ACTION:
     user, created = User.objects.get_or_create(telegram_id=tg_id)
-    if created or not user.phone_number:
-        # if user is created right now or phone_number is empty,
-        # we need to ask for phone number.
-        cache.set(tg_id, "contact_required")
-        return request_phone_number(tg_id)
-    elif not user.username:
-        # if user has phone number but not username,
-        # we need to ask for username.
-        cache.set(tg_id, "username_required")
-        return request_username(tg_id)
+
+    # its unnessary to check if its created, because at the end we care about:
+    # 1. if the user has a phone number or email
+    # 2. if user has a username
+    if (user.phone_number or user.email) and user.username:
+        # authenticated user.
+        cache.set(tg_id, "user")
+        name = user.username
     else:
-        cache.set(tg_id, "menu")
-        # TODO: show menu
+        # otherwise it will be our guest.
+        cache.set(tg_id, "guest")
+
+    # finally we show welcome no matter they are guest or buddie.
+    return welcome(tg_id, name)
