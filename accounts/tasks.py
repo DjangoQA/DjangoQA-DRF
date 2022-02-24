@@ -1,29 +1,22 @@
 from celery import shared_task
-from django.core.mail import send_mail
 
+from _helpers.ghasedak.ghasedak_api import Ghasedak
 from accounts.utils import RedisConnection
 from config import settings
+from config.settings import GHASEDAK_TOKEN, GHASEDAK_TYPE, GHASEDAK_TEMPLATE, GHASEDAK_PARAM1
 
 redis = RedisConnection()
-
-email_content = {
-    'subject': 'Email Verification',
-    'from_email': settings.EMAIL_HOST_USER,
-    'auth_user': settings.EMAIL_HOST_USER,
-    'auth_password': settings.EMAIL_HOST_PASSWORD,
-}
-
-
-@shared_task
-def email_verification(validated_data):
-    email = validated_data.get('email', None)
-    if email:
-        otp_code = redis.set_otp(email)
-        email_content['message'], email_content['recipient_list'] = f'Hi, Your code is: {otp_code}', [email]
-        send_mail(**email_content)
+ghasedak = Ghasedak(GHASEDAK_TOKEN)
 
 
 @shared_task
 def phone_number_verification(validated_data):
-    # TODO-1: create phone number verification
-    pass
+    phone_number = validated_data.get('phone_number', None)
+    if phone_number:
+        otp_code = redis.set_otp(phone_number)
+        is_sent = ghasedak.verification({
+            'receptor': str(phone_number),
+            'type': GHASEDAK_TYPE,
+            'template': GHASEDAK_TEMPLATE,
+            'param1': GHASEDAK_PARAM1
+        })
