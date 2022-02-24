@@ -27,7 +27,10 @@ class User(AbstractUser):
         },
     )
     email = models.EmailField(_('email address'), unique=True)
+    email_is_verified = models.BooleanField(default=False)
+
     phone_number = models.CharField(max_length=12, validators=[phone_number_validator])
+    phone_number_is_verified = models.BooleanField(default=False)
 
     avatar = models.ImageField(upload_to=user_directory_path, verbose_name=_('avatar'))
     telegram_id = models.BigIntegerField(verbose_name=_('telegram id'), null=True, blank=True)
