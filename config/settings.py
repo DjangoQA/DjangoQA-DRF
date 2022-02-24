@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
-
+import os.path
 from os import environ
 from pathlib import Path
 from dotenv import load_dotenv
@@ -30,7 +30,6 @@ DEBUG = bool(int(environ["DEBUG"].strip('"')))
 
 ALLOWED_HOSTS = environ["DJANGO_ALLOWED_HOSTS"].strip('"').split()
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -40,6 +39,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'rest_framework',
+    'drf_yasg',
+
+    'accounts.apps.AccountsConfig',
 ]
 
 MIDDLEWARE = [
@@ -72,7 +76,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
@@ -85,12 +88,14 @@ DATABASES = {
         "PORT": environ["POSTGRES_PORT"].strip('"'),
         "HOST": environ["POSTGRES_HOST"].strip('"'),
     },
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     'NAME': BASE_DIR / 'db.sqlite3',
-    # }
 }
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379',
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -110,25 +115,64 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Tehran'
 
 USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
+MEDIA_URL = 'media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'accounts.User'
+
+# Redis
+REDIS_HOST = environ["REDIS_HOST"].strip('"')
+REDIS_PORT = environ["REDIS_PORT"].strip('"')
+REDIS_DB = environ["REDIS_DB"].strip('"')
+
+# EMAIL
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = environ["EMAIL_HOST_USER"].strip('"')
+EMAIL_HOST_PASSWORD = environ["EMAIL_HOST_PASSWORD"].strip('"')
+
+# Swagger
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+    },
+}
+
+# CELERY
+CELERY_BROKER_URL = environ["CELERY_BROKER_URL"].strip('"')
+
+# OTP
+OTP_EXPIRE_TIME = environ["OTP_EXPIRE_TIME"]
+
+# GHASEDAK
+GHASEDAK_TOKEN = environ["GHASEDAK_TOKEN"].strip('"')
+GHASEDAK_TYPE = environ["GHASEDAK_TYPE"].strip('"')
+GHASEDAK_TEMPLATE = environ["GHASEDAK_TEMPLATE"].strip('"')
+GHASEDAK_PARAM1 = environ["GHASEDAK_PARAM1"].strip('"')
