@@ -88,10 +88,13 @@ DATABASES = {
         "PORT": environ["POSTGRES_PORT"].strip('"'),
         "HOST": environ["POSTGRES_HOST"].strip('"'),
     },
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     'NAME': BASE_DIR / 'db.sqlite3',
-    # }
+}
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379',
+    }
 }
 
 # Password validation
@@ -161,3 +164,15 @@ SWAGGER_SETTINGS = {
         }
     },
 }
+
+# CELERY
+CELERY_BROKER_URL = environ["CELERY_BROKER_URL"].strip('"')
+
+# OTP
+OTP_EXPIRE_TIME = environ["OTP_EXPIRE_TIME"]
+
+# GHASEDAK
+GHASEDAK_TOKEN = environ["GHASEDAK_TOKEN"].strip('"')
+GHASEDAK_TYPE = environ["GHASEDAK_TYPE"].strip('"')
+GHASEDAK_TEMPLATE = environ["GHASEDAK_TEMPLATE"].strip('"')
+GHASEDAK_PARAM1 = environ["GHASEDAK_PARAM1"].strip('"')
