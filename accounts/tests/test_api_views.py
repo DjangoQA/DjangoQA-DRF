@@ -6,8 +6,8 @@ from rest_framework.test import APITestCase
 class OTPAPIViewTest(APITestCase):
     def setUp(self):
         self.url = reverse('accounts:send-otp')
-        self.valid_data = {'email': 'google@gmail.com'}
-        self.invalid_data = {'email': 'bad_email'}
+        self.valid_data = {'phone_number': '989101916484'}
+        self.invalid_data = {'phone_number': '09101916484', 'bad_param': 'bad value'}
 
     def test_valid_email(self):
         response = self.client.post(self.url, data=self.valid_data)
