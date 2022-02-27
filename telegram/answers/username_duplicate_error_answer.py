@@ -1,3 +1,6 @@
+from django.utils.translation import gettext_lazy as _
+
+
 def username_duplicate_error_answer(tg_id, text):
     return {
         "method": "sendMessage",

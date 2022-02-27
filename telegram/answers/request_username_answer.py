@@ -9,6 +9,7 @@ def request_username_answer(tg_id: str):
         "reply_markup": {
             "keyboard": [
                 [_("Cancel")],
-            ]
+            ],
+            "resize_keyboard": True,
         },
     }

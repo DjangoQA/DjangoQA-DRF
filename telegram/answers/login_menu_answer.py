@@ -13,6 +13,6 @@ def login_menu_answer(tg_id: str):
                 [{"text": _("Phone Number"), "request_contact": True}],
                 [_("Google Account")],
                 [_("Cancel")],
-            ]
+            ], "resize_keyboard": True
         },
     }

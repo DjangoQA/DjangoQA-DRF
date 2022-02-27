@@ -10,6 +10,6 @@ def invalid_phone_number_answer(tg_id):
             "keyboard": [
                 [{"text": _("Phone Number"), "request_contact": True}],
                 [_("Cancel")],
-            ]
+            ], "resize_keyboard": True
         },
     }
