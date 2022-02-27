@@ -9,6 +9,6 @@ def welcome_guest_payload(tg_id: str, username: str):
             f"Hi {username} 👋 \nWelcome to DjangoQa official bot. If you need any assistance, I’m always here."
         ),
         "reply_markup": {
-            "inline_keyboard": [[{"text": _("Login"), "callback_data": "login"}]]
+            "keyboard": [[{"text": _("Login")}]]
         },
     }

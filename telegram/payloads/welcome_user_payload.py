@@ -6,9 +6,6 @@ def welcome_user_payload(tg_id: str, username: str):
         "method": "sendMessage",
         "chat_id": tg_id,
         "text": _(
-            f"How you doing {username}? \nWelcome back. If you need any assistance, I’m always here."
+            f"How you doing {username}?\nIf you need any assistance, I’m always here."
         ),
-        "reply_markup": {
-            "inline_keyboard": [[{"text": _("Profile"), "callback_data": "profile"}]]
-        },
     }

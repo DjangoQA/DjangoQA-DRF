@@ -20,9 +20,9 @@ def start_action(message: dict):
     # 2. if user has a username
     if (user.phone_number or user.email) and user.username:
         # authenticated user.
-        cache.set(tg_id, "user")
+        cache.set(tg_id, "USER")
         return welcome_user_payload(tg_id, user.username)
     else:
         # otherwise it will be our guest.
-        cache.set(tg_id, "guest")
+        cache.set(tg_id, "GUEST")
         return welcome_guest_payload(tg_id, name)

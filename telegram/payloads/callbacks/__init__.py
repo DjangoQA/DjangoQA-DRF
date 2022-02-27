@@ -1,3 +1,0 @@
-from .login_callback_payload import login_callback_payload
-from .welcome_guest_callback_payload import welcome_guest_callback_payload
-from .welcome_user_callback_payload import welcome_user_callback_payload

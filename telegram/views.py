@@ -9,11 +9,10 @@ from rest_framework.generics import GenericAPIView
 from .permissions import TokenPermission
 from .actions import (
     start_action,
-    contact_required_action,
+    guest_action,
+    login_menu_action,
     username_required_action,
-    phone_login_action,
 )
-from .actions.callbacks import welcome_callback_action, login_callback_action
 
 
 class WebhookGenericApiView(GenericAPIView):
@@ -21,43 +20,39 @@ class WebhookGenericApiView(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         """
-        Processes the incoming message and only calls the required Action.
+        Inspect the incoming request for messages,
+        calls dispatcher and returns the payload to Telegram API.
         """
+
         self.payload = {}
 
-        # process the incoming message
-        if (
-            "message" in request.data
-            and request.data["message"]["chat"]["type"] == "private"
-        ):
-            message = request.data["message"]
+        message = request.data["message"] if "message" in request.data else None
 
-            # now its safe to get chat_id key.
+        if message and message["chat"]["type"] == "private":
             tg_id = message["chat"]["id"]
-
-            # get the state from cache using tg_id.
             state = cache.get(tg_id)
-
-            # detecting Start command ->
-            if not state or ("text" in message and message["text"] == "/start"):
-                # if state is None, we need to call start action.
-                self.payload = start_action(message)
-
-            elif state == "contact_required":
-                self.payload = contact_required(message)
-
-            elif state == "username_required":
-                self.payload = username_required(message)
-
-        elif "callback_query" in request.data:
-            # now its safe to get below keys.
-            callback = request.data["callback_query"]
-            data = callback["data"]
-
-            # routing the callback data to the required action.
-            if data == "welcome":
-                self.payload = welcome_callback_action(callback)
-            if data == "login":
-                self.payload = login_callback_action(callback)
+            self.dispatcher(state, message)
 
         return Response(self.payload, status.HTTP_200_OK)
+
+    def dispatcher(self, state, message):
+        """
+        Simply checks the state and set payload to required action.
+
+        - has nothing to do with 'dispatch' in django.
+        """
+        
+        print("state: ", state)
+
+        if not state or ("text" in message and message["text"] == "/start"):
+            # if state is None or /start command entered then start the conversation.
+            self.payload = start_action(message)
+
+        elif state == "GUEST":
+            self.payload = guest_action(message)
+
+        elif state == "LOGIN-MENU":
+            self.payload = login_menu_action(message)
+
+        elif state == "USERNAME-REQUIRED":
+            self.payload = username_required_action(message)
