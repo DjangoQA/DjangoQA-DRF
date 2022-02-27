@@ -41,8 +41,6 @@ class WebhookGenericApiView(GenericAPIView):
 
         - has nothing to do with 'dispatch' in django.
         """
-        
-        print("state: ", state)
 
         if not state or ("text" in message and message["text"] == "/start"):
             # if state is None or /start command entered then start the conversation.

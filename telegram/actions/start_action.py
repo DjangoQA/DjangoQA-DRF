@@ -2,7 +2,7 @@ from django.core.cache import cache
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 
-from telegram.payloads import welcome_user_payload, welcome_guest_payload
+from telegram.answers import welcome_user_answer, welcome_guest_answer
 
 User = get_user_model()
 
@@ -21,8 +21,8 @@ def start_action(message: dict):
     if (user.phone_number or user.email) and user.username:
         # authenticated user.
         cache.set(tg_id, "USER")
-        return welcome_user_payload(tg_id, user.username)
+        return welcome_user_answer(tg_id, user.username)
     else:
         # otherwise it will be our guest.
         cache.set(tg_id, "GUEST")
-        return welcome_guest_payload(tg_id, name)
+        return welcome_guest_answer(tg_id, name)

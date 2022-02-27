@@ -6,13 +6,13 @@ from django.utils.translation import gettext_lazy as _
 
 
 from accounts.validators import TelegramUsernameValidator
-from telegram.payloads import (
-    username_validation_error_payload,
-    username_duplicate_error_payload,
-    request_username_payload,
-    welcome_guest_payload,
+from telegram.answers import (
+    username_validation_error_answer,
+    username_duplicate_error_answer,
+    request_username_answer,
+    welcome_guest_answer,
 )
-from telegram.payloads.success_signup_payload import success_signup_payload
+from telegram.answers.success_signup_answer import success_signup_answer
 
 
 User = get_user_model()
@@ -29,23 +29,23 @@ def username_required_action(message: dict):
         username = message["text"]
     else:
         # repeat the message if no text is entered.
-        return request_username_payload(tg_id)
+        return request_username_answer(tg_id)
 
     if username.lower() == "cancel":
         # jump '2' step back from currently USERNAME_REQUIRED to GUEST
         cache.set(tg_id, "GUEST")
-        return welcome_guest_payload(tg_id, username)
+        return welcome_guest_answer(tg_id, username)
 
     try:
         validator(username)
         User.objects.filter(telegram_id=tg_id).update(username=username)
 
     except ValidationError as error:
-        return username_validation_error_payload(tg_id, error.message, text)
+        return username_validation_error_answer(tg_id, error.message, text)
 
     except IntegrityError:
-        return username_duplicate_error_payload(tg_id, text)
+        return username_duplicate_error_answer(tg_id, text)
 
     else:
         cache.set(tg_id, "USER")
-        return success_signup_payload(tg_id, username)
+        return success_signup_answer(tg_id, username)

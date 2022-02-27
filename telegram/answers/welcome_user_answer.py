@@ -1,7 +1,7 @@
 from django.utils.translation import gettext_lazy as _
 
 
-def welcome_user_payload(tg_id: str, username: str):
+def welcome_user_answer(tg_id: str, username: str):
     return {
         "method": "sendMessage",
         "chat_id": tg_id,
