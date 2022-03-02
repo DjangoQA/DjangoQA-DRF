@@ -162,3 +162,9 @@ EMAIL_HOST_PASSWORD = environ["EMAIL_HOST_PASSWORD"].strip('"')
 # Telegram
 TELEGRAM_BOT_TOKEN = environ["TELEGRAM_BOT_TOKEN"].strip('"')
 TELEGRAM_BOT_ENDPOINT = environ["TELEGRAM_BOT_ENDPOINT"].strip('"')
+TELEGRAM_OATH_BASE_URL = "https://accounts.google.com/o/oauth2/v2/auth/oauthchooseaccount?"
+TELEGRAM_OATH_SCOPE = "https://www.googleapis.com/auth/userinfo.email"
+TELEGRAM_OATH_RESPONSE_TYPE = "code"
+TELEGRAM_OATH_REDIRECT_URI = environ["TELEGRAM_OATH_REDIRECT_URI"].strip('"')
+TELEGRAM_OATH_CLIENT_ID = environ["TELEGRAM_OATH_CLIENT_ID"].strip('"')
+TELEGRAM_OATH_CLIENT_SECRET = environ["TELEGRAM_OATH_CLIENT_SECRET"].strip('"')
