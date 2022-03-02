@@ -21,6 +21,7 @@ User = get_user_model()
 def username_required_action(message: dict):
     # INITIALIZING VARIABLES:
     tg_id = message["chat"]["id"]
+    name = message["chat"]["first_name"]
     text = _("Please enter your desired Username:")
     validator = TelegramUsernameValidator()
 
@@ -34,7 +35,7 @@ def username_required_action(message: dict):
     if username.lower() == "cancel":
         # jump '2' step back from currently USERNAME_REQUIRED to GUEST
         cache.set(tg_id, "GUEST")
-        return welcome_guest_answer(tg_id, username)
+        return welcome_guest_answer(tg_id, name)
 
     try:
         validator(username)

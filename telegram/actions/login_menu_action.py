@@ -32,11 +32,10 @@ def login_menu_action(message: dict):
             user.phone_number = contact_phone_number.lstrip("+")
             user.save()
             cache.set(tg_id, "USERNAME-REQUIRED")
-            return request_username_answer(tg_id)
+            return request_username_answer(tg_id, user.phone_number)
 
     elif text == "google account" or text == "google":
         cache.set(tg_id, "GOOGLE-LOGIN")
-        # TODO: implement google login
         return google_login_answer(tg_id)
 
     elif text == "cancel":
